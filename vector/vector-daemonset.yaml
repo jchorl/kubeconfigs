@@ -1,0 +1,107 @@
+---
+# Permissions to use Kubernetes API.
+# Necessary for kubernetes_pod_metadata transform.
+# Requires that RBAC authorization is enabled.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vector-permissions
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: monitoring
+roleRef:
+  kind: ClusterRole
+  name: view
+  apiGroup: rbac.authorization.k8s.io
+---
+# ConfigMap which contains vector.toml configuration for pods.
+#
+# This can also be removed and loaded from a file via `kubectl`.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vector-config
+  namespace: monitoring
+data:
+  vector-agent-config: |
+    # file: vector.toml
+    # Configuration for vector-agent
+    # Docs: https://vector.dev/docs/
+
+    # Set global options
+    data_dir = "/var/tmp/vector"
+
+    # Ingest logs from Kubernetes
+    [sources.kubernetes]
+      type = "kubernetes"
+
+    # Enrich logs with Pod metadata
+    [transforms.pod_metadata]
+      type = "kubernetes_pod_metadata"
+      inputs = ["kubernetes"]
+
+    [sinks.loki]
+      type = "loki"
+      inputs = ["kubernetes"]
+      endpoint = "http://loki:3100"
+      encoding.codec = "json"
+      labels.key = "value"
+      labels.key = "{{ event_field }}"
+---
+# Vector agent ran on each node where it collects logs from pods.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: vector-agent
+  namespace: monitoring
+spec:
+  minReadySeconds: 1
+  selector:
+    matchLabels:
+      name: vector-agent
+  template:
+    metadata:
+      labels:
+        name: vector-agent
+    spec:
+      volumes:
+      # Directory with logs
+      - name: var-log
+        hostPath:
+          path: /var/log/
+      # Docker and containerd log files in Kubernetes are symlinks to this folder.
+      - name: var-lib
+        hostPath:
+          path: /var/lib/
+      # Vector will store it's data here.
+      - name: data-dir
+        emptyDir: {}
+      # Mount vector configuration from config map as a file vector.toml
+      - name: config-dir
+        configMap:
+         name: vector-config
+         items:
+           - key: vector-agent-config
+             path: vector.toml
+      containers:
+      - name: vector
+        image: timberio/vector@sha256:5ee08e91c325d792695b167512ba2ad04b925061415f92d941792624598c7e42 # nightly-alpine as of 13/04 TODO: switch to mainstream as soon as k8s support is there
+        args: ["-w"]
+        volumeMounts:
+        - name: var-log
+          mountPath: /var/log/
+          readOnly: true
+        - name: var-lib
+          mountPath: /var/lib
+          readOnly: true
+        - name: data-dir
+          mountPath: /var/tmp/vector
+        - name: config-dir
+          mountPath: /etc/vector
+          readOnly: true
+        env:
+        - name: VECTOR_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
