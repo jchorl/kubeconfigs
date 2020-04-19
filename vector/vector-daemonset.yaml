@@ -86,7 +86,7 @@ spec:
              path: vector.toml
       containers:
       - name: vector
-        image: timberio/vector@sha256:5ee08e91c325d792695b167512ba2ad04b925061415f92d941792624598c7e42 # nightly-alpine as of 13/04 TODO: switch to mainstream as soon as k8s support is there
+        image: timberio/vector:nightly-2020-04-14-alpine # TODO: switch to mainstream as soon as k8s support is there
         args: ["-w"]
         volumeMounts:
         - name: var-log
@@ -105,3 +105,8 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
