@@ -19,6 +19,7 @@ spec:
       labels:
         app: pihole
     spec:
+      hostNetwork: true
       containers:
       - name: pihole
         image: pihole/pihole:latest
@@ -41,6 +42,10 @@ spec:
           value: 1.1.1.1
         - name: DNS2
           value: 8.8.8.8
+        - name: ServerIP
+          valueFrom:
+            fieldRef:
+               fieldPath: status.hostIP
         volumeMounts:
         - name: etc-pihole
           mountPath: /etc/pihole/
