@@ -8,10 +8,10 @@ metadata:
   namespace: pihole
 data:
   lan.list: |-
-    192.168.0.104    troy.local    troy
-    192.168.0.107    dns.local     orangepipcplus
-    192.168.0.111    bedroom.local orangepizero
-    192.168.0.119    bike.local    bike
+    192.168.0.104    troy.choo.dev    troy
+    192.168.0.107    dns.choo.dev     orangepipcplus
+    192.168.0.111    bedroom.choo.dev orangepizero
+    192.168.0.119    bike.choo.dev    bike
 ---
 apiVersion: v1
 kind: ConfigMap
