@@ -51,6 +51,11 @@ spec:
           mountPath: /etc/pihole/
         - name: dnsmasq
           mountPath: /etc/dnsmasq.d/
+        - name: local-dns-conf
+          mountPath: /etc/pihole-local
+        - name: dnsmasq-conf
+          mountPath: /etc/dnsmasq.d/02-lan.conf
+          subPath: 02-lan.conf
         readinessProbe:
           exec:
             command: ['dig', '@127.0.0.1', 'google.com']
@@ -99,6 +104,12 @@ spec:
         emptyDir: {}
       - name: dnsmasq
         emptyDir: {}
+      - name: local-dns-conf
+        configMap:
+          name: local-dns-conf
+      - name: dnsmasq-conf
+        configMap:
+          name: dnsmasq-conf
       tolerations:
       - key: "dedicated"
         operator: "Equal"

@@ -1,0 +1,25 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-dns-conf
+  labels:
+    name: local-dns-conf
+  namespace: pihole
+data:
+  lan.list: |-
+    192.168.0.104    troy.local    troy
+    192.168.0.107    dns.local     orangepipcplus
+    192.168.0.111    bedroom.local orangepizero
+    192.168.0.119    bike.local    bike
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dnsmasq-conf
+  labels:
+    name: dnsmasq-conf
+  namespace: pihole
+data:
+  02-lan.conf: |-
+    addn-hosts=/etc/pihole-local/lan.list
