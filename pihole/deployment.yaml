@@ -54,14 +54,39 @@ spec:
         readinessProbe:
           exec:
             command: ['dig', '@127.0.0.1', 'google.com']
-          timeoutSeconds: 20
+          timeoutSeconds: 1
           initialDelaySeconds: 5
-          periodSeconds: 60
+          periodSeconds: 5
         livenessProbe:
           tcpSocket:
-            port: dns-tcp
+            port: 80
           initialDelaySeconds: 15
           periodSeconds: 30
+      - name: metrics-exporter
+        image: jchorl/pihole-exporter:dbf1e8b72ef5340fd429c0a370603b7a5c2e8527-arm32v7
+        ports:
+        - containerPort: 9617
+        readinessProbe:
+          tcpSocket:
+            port: 9617
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 9617
+          initialDelaySeconds: 15
+          periodSeconds: 30
+        env:
+        - name: PORT
+          value: "9617"
+        - name: PIHOLE_HOSTNAME
+          valueFrom:
+            fieldRef:
+               fieldPath: status.hostIP
+        - name: PIHOLE_PASSWORD
+          value: password
+        - name: INTERVAL
+          value: 1m
       dnsPolicy: "None"
       dnsConfig:
         nameservers:
