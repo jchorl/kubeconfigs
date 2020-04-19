@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards-conf
+  labels:
+    name: grafana-dashboards-conf
+  namespace: monitoring
+data:
+  dashboards.yaml: |-
+    apiVersion: 1
+    providers:
+    - name: 'dashboard provider'
+      folder: ''
+      type: file
+      disableDeletion: true
+      editable: false
+      options:
+        path: /etc/grafana/provisioning/dashboards
