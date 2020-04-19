@@ -1,0 +1,33 @@
+# ConfigMap which contains vector.toml configuration for pods.
+#
+# This can also be removed and loaded from a file via `kubectl`.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vector-config
+  namespace: monitoring
+data:
+  vector-agent-config: |
+    # file: vector.toml
+    # Configuration for vector-agent
+    # Docs: https://vector.dev/docs/
+
+    # Set global options
+    data_dir = "/var/tmp/vector"
+
+    # Ingest logs from Kubernetes
+    [sources.kubernetes]
+      type = "kubernetes"
+
+    # Enrich logs with Pod metadata
+    [transforms.pod_metadata]
+      type = "kubernetes_pod_metadata"
+      inputs = ["kubernetes"]
+
+    [sinks.loki]
+      type = "loki"
+      inputs = ["kubernetes"]
+      endpoint = "http://loki:3100"
+      encoding.codec = "json"
+      labels.container_name = "{{ container_name }}"
+      labels.pod_name = "{{ pod_name }}"

@@ -17,7 +17,7 @@ spec:
       - name: loki
         image: grafana/loki:1.4.1
         args:
-          - "-config.file=/etc/loki/local-config.yaml"
+          - "-config.file=/etc/loki/config.yaml"
         resources:
           requests:
             cpu: 500m
@@ -27,5 +27,17 @@ spec:
             memory: 1Gi
         ports:
         - containerPort: 3100
-
-# TODO store the logs persistently
+        volumeMounts:
+        - name: loki-config
+          mountPath: /etc/loki
+          readOnly: true
+        - name: loki-storage
+          mountPath: /data/loki
+      volumes:
+      - name: loki-config
+        configMap:
+          name: loki-server-conf
+      - name: loki-storage
+        hostPath:
+          path: /data/loki
+          type: DirectoryOrCreate
