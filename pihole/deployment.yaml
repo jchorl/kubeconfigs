@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  namespace: pihole
+  labels:
+    app: pihole
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: pihole
+  template:
+    metadata:
+      labels:
+        app: pihole
+    spec:
+      containers:
+      - name: pihole
+        image: pihole/pihole:latest
+        ports:
+        - containerPort: 80
+          hostPort: 80
+          protocol: TCP
+        - containerPort: 53
+          hostPort: 53
+          protocol: TCP
+        - containerPort: 53
+          hostPort: 53
+          protocol: UDP
+        env:
+        - name: TZ
+          value: America/Los_Angeles
+        - name: WEBPASSWORD
+          value: password
+        - name: DNS1
+          value: 1.1.1.1
+        - name: DNS2
+          value: 8.8.8.8
+        volumeMounts:
+        - name: etc-pihole
+          mountPath: /etc/pihole/
+        - name: dnsmasq
+          mountPath: /etc/dnsmasq.d/
+        readinessProbe:
+          exec:
+            command: ['dig', '@127.0.0.1', 'google.com']
+          timeoutSeconds: 20
+          initialDelaySeconds: 5
+          periodSeconds: 60
+        livenessProbe:
+          tcpSocket:
+            port: dns-tcp
+          initialDelaySeconds: 15
+          periodSeconds: 30
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          - 127.0.0.1
+          - 1.1.1.1
+      nodeSelector:
+        dedicated: dns
+      volumes:
+      - name: etc-pihole
+        emptyDir: {}
+      - name: dnsmasq
+        emptyDir: {}
+      tolerations:
+      - key: "dedicated"
+        operator: "Equal"
+        value: "dns"
+        effect: "NoSchedule"
