@@ -28,6 +28,7 @@ data:
       type = "loki"
       inputs = ["kubernetes"]
       endpoint = "http://loki:3100"
-      encoding.codec = "json"
+      encoding.codec = "text"
+      encoding.only_fields = ["container_name","pod_name","timestamp","message"]
       labels.container_name = "{{ container_name }}"
       labels.pod_name = "{{ pod_name }}"
