@@ -13,13 +13,14 @@ spec:
         spec:
           containers:
           - name: borgman
-            image: jchorl/borgman:sha-e9b2b8b
+            image: jchorl/borgman:sha-242b8a3
             args:
             - --keep-daily=1
             - --keep-weekly=1
             - --keep-monthly=4
             - --repo=/mnt/backup
             - --rclone-dest=remote:$(BACKBLAZE_BUCKET)
+            - --prometheus-push-addr=prometheus.monitoring:9091
             - /mnt/data
             volumeMounts:
             - name: mnt-data
