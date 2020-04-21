@@ -3,14 +3,15 @@ kind: Service
 metadata:
   name: prometheus
   namespace: monitoring
-  annotations:
-      prometheus.io/scrape: 'true'
-      prometheus.io/port: '9090'
 spec:
   selector:
     app: prometheus
   type: NodePort
   ports:
     - port: 9090
+      name: prometheus
       targetPort: 9090
       nodePort: 30090
+    - port: 9091
+      name: push
+      targetPort: 9091

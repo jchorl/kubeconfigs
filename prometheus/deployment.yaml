@@ -39,6 +39,10 @@ spec:
               mountPath: /etc/prometheus/
             - name: prometheus-storage-volume
               mountPath: /data/prometheus/
+        - name: push-gateway
+          image: prom/pushgateway:v1.2.0
+          ports:
+            - containerPort: 9091
       volumes:
         - name: prometheus-config-volume
           configMap:
