@@ -1,0 +1,66 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: borgman
+  namespace: borgman
+spec:
+  schedule: "0 0 * * *" # at midnight in some timezone, every day
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          containers:
+          - name: borgman
+            image: jchorl/borgman:sha-e9b2b8b
+            args:
+            - --keep-daily=1
+            - --keep-weekly=1
+            - --keep-monthly=4
+            - --repo=/mnt/backup
+            - --rclone-dest=remote:$(BACKBLAZE_BUCKET)
+            - /mnt/data
+            volumeMounts:
+            - name: mnt-data
+              mountPath: /mnt/data
+              readOnly: true
+            - name: mnt-backup
+              mountPath: /mnt/backup
+            env:
+            - name: BORG_PASSPHRASE
+              valueFrom:
+                secretKeyRef:
+                  name: borg
+                  key: borg_passphrase.txt
+            - name: RCLONE_CONFIG_REMOTE_TYPE
+              value: b2
+            - name: RCLONE_CONFIG_REMOTE_HARD_DELETE
+              value: "true"
+            - name: RCLONE_DELETE_EXCLUDED
+              value: "true"
+            - name: BACKBLAZE_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: backblaze
+                  key: bucket.txt
+            - name: RCLONE_CONFIG_REMOTE_ACCOUNT
+              valueFrom:
+                secretKeyRef:
+                  name: backblaze
+                  key: backblaze_key_id.txt
+            - name: RCLONE_CONFIG_REMOTE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backblaze
+                  key: backblaze_key.txt
+          volumes:
+          - name: mnt-data
+            hostPath:
+              path: /mnt/data
+              type: Directory
+          - name: mnt-backup
+            hostPath:
+              path: /mnt/backup
+              type: Directory
+          restartPolicy: OnFailure
