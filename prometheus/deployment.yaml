@@ -19,6 +19,29 @@ spec:
       labels:
         app: prometheus
     spec:
+      initContainers:
+        - name: init-sub-password
+          image: alpine:3.11
+          command: ["sh"]
+          args:
+            - -c
+            - "cp /etc/alertmanager-orig/alertmanager.yml /etc/alertmanager/alertmanager.yml && sed -i'' 's/SMTP_PASSWORD/$(SENDGRID_API_KEY)/' /etc/alertmanager/alertmanager.yml && sed -i'' 's/TO_EMAIL/$(TO_EMAIL)/' /etc/alertmanager/alertmanager.yml"
+          env:
+            - name: SENDGRID_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: alertmanager
+                  key: sendgrid_api_key.txt
+            - name: TO_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: alertmanager
+                  key: to_email.txt
+          volumeMounts:
+            - name: alertmanager-config-volume-orig
+              mountPath: /etc/alertmanager-orig
+            - name: alertmanager-config-volume-subbed
+              mountPath: /etc/alertmanager
       containers:
         - name: prometheus
           image: prom/prometheus:v2.17.1
@@ -43,10 +66,25 @@ spec:
           image: prom/pushgateway:v1.2.0
           ports:
             - containerPort: 9091
+        - name: alertmanager
+          image: prom/alertmanager:v0.20.0
+          ports:
+            - containerPort: 9093
+          args:
+            - "--config.file=/etc/alertmanager/alertmanager.yml"
+          volumeMounts:
+            - name: alertmanager-config-volume-subbed
+              mountPath: /etc/alertmanager
+              readOnly: true
       volumes:
         - name: prometheus-config-volume
           configMap:
             name: prometheus-server-conf
+        - name: alertmanager-config-volume-orig
+          configMap:
+            name: alertmanager-conf
+        - name: alertmanager-config-volume-subbed
+          emptyDir: {}
         - name: prometheus-storage-volume
           hostPath:
             path: /data/prometheus

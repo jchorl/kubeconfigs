@@ -8,6 +8,16 @@ metadata:
 data:
   prometheus.rules: |-
     groups:
+      - name: test
+        rules:
+          - alert: TestAlert
+            expr: vector(0)
+            for: 1m
+            labels:
+              alertname: somealert
+              severity: page
+            annotations:
+              summary: Some summary here
   prometheus.yml: |-
     global:
       scrape_interval: 5s
@@ -22,3 +32,8 @@ data:
         honor_labels: true
         static_configs:
           - targets: ['localhost:9091']
+    alerting:
+      alertmanagers:
+        - static_configs:
+          - targets:
+            - localhost:9093
