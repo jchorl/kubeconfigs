@@ -1,0 +1,22 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: pecker
+  namespace: pecker
+spec:
+  schedule: "5 14 * * 2" # run once per week
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          containers:
+          - name: pecker
+            image: jchorl/pecker:sha-f09afef
+            args:
+            - --drive=/dev/sdb
+            - --drive=/dev/sdc
+            - --prometheus-push-addr=prometheus.monitoring:9091
+            securityContext:
+              privileged: true
+          restartPolicy: OnFailure
