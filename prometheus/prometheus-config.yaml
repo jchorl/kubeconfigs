@@ -8,16 +8,24 @@ metadata:
 data:
   prometheus.rules: |-
     groups:
-      - name: test
+      - name: borgman
         rules:
-          - alert: TestAlert
-            expr: vector(0)
+          - alert: Failing
+            expr: time() - borgman_last_completed_epoch_seconds{success="1"} > 60*60*24*2
             for: 1m
             labels:
-              alertname: somealert
               severity: page
             annotations:
-              summary: Some summary here
+              summary: Borgman has not succeeded in the last 2 days
+      - name: pecker
+        rules:
+          - alert: Failing
+            expr: time() - pecker_last_completed_epoch_seconds{success="1"} > 60*60*24*8
+            for: 1m
+            labels:
+              severity: page
+            annotations:
+              summary: Pecker has not succeeded in the last 8 days
   prometheus.yml: |-
     global:
       scrape_interval: 5s
