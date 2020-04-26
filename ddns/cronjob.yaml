@@ -12,10 +12,17 @@ spec:
         spec:
           containers:
           - name: ddns
-            image: jchorl/httprom:sha-60a7a22
+            image: jchorl/httprom:sha-3542670
             args:
             - -X=PUT
             - --metrics-prefix=ddns
             - --prometheus-push-addr=prometheus.monitoring:9091
+            - "--header=Authorization: Bearer $(AUTHORIZATION_KEY)"
             - https://ns1.choo.dev/update
+            env:
+            - name: AUTHORIZATION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: auth
+                  key: token
           restartPolicy: OnFailure
