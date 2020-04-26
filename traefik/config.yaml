@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-conf
+  labels:
+    name: traefik-conf
+  namespace: kube-system
+data:
+  middlewares.toml: |
+    [http]
+      [http.middlewares]
+        [http.middlewares.auth]
+          [http.middlewares.auth.forwardAuth]
+            address = "http://localhost:4181"
+            authResponseHeaders = ["X-Forwarded-User"]
+        [http.middlewares.https-redirect]
+          [http.middlewares.https-redirect.redirectScheme]
+            scheme = "https"
+            permanent = true

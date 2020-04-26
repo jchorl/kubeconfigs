@@ -1,0 +1,14 @@
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  rules:
+    - host: auth.choo.dev
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: traefik-ingress-service
+              servicePort: 4181

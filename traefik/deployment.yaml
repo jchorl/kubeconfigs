@@ -24,12 +24,15 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - image: traefik:v2.2
-        name: traefik-ingress-lb
+        name: traefik
         args:
         - --api.insecure=true
+        - --providers.file.filename=/etc/traefik/middlewares.toml
         - --providers.kubernetesingress=true
         - --entrypoints.web.address=:80
+        - --entrypoints.web.http.middlewares=https-redirect@file,auth@file
         - --entrypoints.websecure.address=:443
+        - --entrypoints.websecure.http.middlewares=https-redirect@file,auth@file
         - --entrypoints.websecure.http.tls.certresolver=myhttpchallenge
         - --certificatesresolvers.myhttpchallenge.acme.httpchallenge=true
         - --certificatesresolvers.myhttpchallenge.acme.httpchallenge.entrypoint=web
@@ -45,15 +48,40 @@ spec:
         volumeMounts:
         - name: letsencrypt-storage
           mountPath: /letsencrypt
+        - name: traefik-conf
+          mountPath: /etc/traefik
+      - image: thomseddon/traefik-forward-auth:2
+        name: forward-auth
+        ports:
+        - name: http
+          containerPort: 4181
+        env:
+        - name: COOKIE_DOMAIN
+          value: choo.dev
+        - name: DOMAIN
+          value: joshchorlton.com
+        - name: AUTH_HOST
+          value: auth.choo.dev
+        - name: PROVIDERS_GOOGLE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: ingress
+              key: google_client_id
+        - name: PROVIDERS_GOOGLE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: ingress
+              key: google_client_secret
+        - name: SECRET
+          valueFrom:
+            secretKeyRef:
+              name: ingress
+              key: forward_auth_secret
       volumes:
+      - name: traefik-conf
+        configMap:
+          name: traefik-conf
       - name: letsencrypt-storage
         hostPath:
           path: /data/letsencrypt
           type: DirectoryOrCreate
-      nodeSelector:
-        dedicated: ingress
-      tolerations:
-      - key: "dedicated"
-        operator: "Equal"
-        value: "ingress"
-        effect: "NoSchedule"
