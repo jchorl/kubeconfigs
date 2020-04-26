@@ -57,6 +57,8 @@ spec:
                 name: grafana-dashboards-conf
             - configMap:
                 name: pihole-dashboard-conf
+            - configMap:
+                name: infra-dashboard-conf
         - name: grafana-plugins
           hostPath:
             path: /data/grafana/plugins
