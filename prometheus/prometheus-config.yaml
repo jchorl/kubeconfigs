@@ -26,6 +26,15 @@ data:
               severity: page
             annotations:
               summary: Pecker has not succeeded in the last 8 days
+      - name: ddns
+        rules:
+          - alert: Failing
+            expr: time() - ddns_last_completed_epoch_seconds{status="202"} > 60*60
+            for: 1m
+            labels:
+              severity: page
+            annotations:
+              summary: ddns has not succeeded in the last hour
   prometheus.yml: |-
     global:
       scrape_interval: 5s
