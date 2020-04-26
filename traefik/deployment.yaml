@@ -25,13 +25,31 @@ spec:
       containers:
       - image: traefik:v2.2
         name: traefik-ingress-lb
+        args:
+        - --api.insecure=true
+        - --providers.kubernetesingress=true
+        - --entrypoints.web.address=:80
+        - --entrypoints.websecure.address=:443
+        - --entrypoints.websecure.http.tls.certresolver=myhttpchallenge
+        - --certificatesresolvers.myhttpchallenge.acme.httpchallenge=true
+        - --certificatesresolvers.myhttpchallenge.acme.httpchallenge.entrypoint=web
+        - --certificatesresolvers.myhttpchallenge.acme.email=jchorlton+traefikcerts@gmail.com
+        - --certificatesresolvers.myhttpchallenge.acme.storage=/letsencrypt/acme.json
         ports:
         - name: http
           containerPort: 80
+        - name: https
+          containerPort: 443
         - name: admin
           containerPort: 8080
-        args:
-        - --providers.kubernetesingress=true
+        volumeMounts:
+        - name: letsencrypt-storage
+          mountPath: /letsencrypt
+      volumes:
+      - name: letsencrypt-storage
+        hostPath:
+          path: /data/letsencrypt
+          type: DirectoryOrCreate
       nodeSelector:
         dedicated: ingress
       tolerations:
