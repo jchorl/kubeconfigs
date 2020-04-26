@@ -1,0 +1,21 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: ddns
+  namespace: ddns
+spec:
+  schedule: "4 * * * *" # run every hour
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          containers:
+          - name: ddns
+            image: jchorl/httprom:sha-60a7a22
+            args:
+            - -X=PUT
+            - --metrics-prefix=ddns
+            - --prometheus-push-addr=prometheus.monitoring:9091
+            - https://ns1.choo.dev/update
+          restartPolicy: OnFailure
