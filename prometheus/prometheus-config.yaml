@@ -49,6 +49,9 @@ data:
         honor_labels: true
         static_configs:
           - targets: ['localhost:9091']
+      - job_name: 'nodemetrics'
+        kubernetes_sd_configs:
+          - role: endpoints
     alerting:
       alertmanagers:
         - static_configs:
