@@ -50,8 +50,15 @@ data:
         static_configs:
           - targets: ['localhost:9091']
       - job_name: 'nodemetrics'
+        relabel_configs: # only scrape services with prometheus.io/scrape: "true" annotations
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
         kubernetes_sd_configs:
           - role: endpoints
+            namespaces:
+              names:
+                - monitoring
     alerting:
       alertmanagers:
         - static_configs:
