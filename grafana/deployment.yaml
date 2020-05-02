@@ -36,6 +36,10 @@ spec:
             cpu: 500m
             memory: 1Gi
         volumeMounts:
+          - name: grafana-server
+            mountPath: /etc/grafana/grafana.ini
+            subPath: grafana.ini
+            readOnly: true
           - name: grafana-datasources
             mountPath: /etc/grafana/provisioning/datasources/
             readOnly: true
@@ -50,6 +54,9 @@ spec:
         - name: grafana-datasources
           configMap:
             name: grafana-datasources-conf
+        - name: grafana-server
+          configMap:
+            name: grafana-server-conf
         - name: grafana-dashboards
           projected:
             sources:
