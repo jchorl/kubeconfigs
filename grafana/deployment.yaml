@@ -27,7 +27,7 @@ spec:
           name: grafana-plugins
       containers:
       - name: grafana
-        image: grafana/grafana:6.7.2
+        image: grafana/grafana:7.0.5
         resources:
           requests:
             cpu: 500m
