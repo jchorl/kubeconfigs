@@ -24,7 +24,6 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 3,
       "links": [],
       "panels": [
         {
@@ -33,6 +32,12 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -85,7 +90,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Spending",
+          "title": "Spending Categorized",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -125,6 +130,12 @@ data:
         {
           "columns": [],
           "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fontSize": "100%",
           "gridPos": {
             "h": 8,
@@ -136,22 +147,105 @@ data:
           "pageSize": null,
           "showHeader": true,
           "sort": {
-            "col": 0,
+            "col": 4,
             "desc": true
           },
           "styles": [
             {
-              "alias": "Time",
+              "$$hashKey": "object:2392",
+              "alias": "Date",
               "align": "auto",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD",
+              "decimals": 2,
+              "mappingType": 1,
+              "pattern": "epoch_ms",
+              "thresholds": [],
+              "type": "date",
+              "unit": "short"
+            },
+            {
+              "$$hashKey": "object:2413",
+              "alias": "Amount",
+              "align": "auto",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
               "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "pattern": "Time",
-              "type": "date"
+              "decimals": 2,
+              "mappingType": 1,
+              "pattern": "Value",
+              "thresholds": [],
+              "type": "number",
+              "unit": "currencyUSD"
+            },
+            {
+              "$$hashKey": "object:2662",
+              "alias": "Name",
+              "align": "auto",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "mappingType": 1,
+              "pattern": "name",
+              "thresholds": [],
+              "type": "string",
+              "unit": "short"
+            },
+            {
+              "$$hashKey": "object:2685",
+              "alias": "Category",
+              "align": "auto",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "mappingType": 1,
+              "pattern": "category",
+              "thresholds": [],
+              "type": "string",
+              "unit": "short"
+            },
+            {
+              "$$hashKey": "object:2706",
+              "alias": "Account",
+              "align": "auto",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "mappingType": 1,
+              "pattern": "account",
+              "thresholds": [],
+              "type": "string",
+              "unit": "short"
             }
           ],
           "targets": [
             {
               "expr": "sort_desc(topk (5, (max by (account, category, date, name) (transaction_amount_cents{category!=\"Savings\"}) > 0)) / 100)",
-              "format": "table",
+              "format": "time_series",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -160,12 +254,154 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Panel Title",
+          "title": "Top Expenses",
           "transform": "table",
-          "type": "table"
+          "transformations": [
+            {
+              "id": "labelsToFields",
+              "options": {}
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "epoch_ms",
+                "binary": {
+                  "left": "date",
+                  "operator": "*",
+                  "reducer": "sum",
+                  "right": "1000"
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "date": true
+                },
+                "indexByName": {
+                  "Time": 2,
+                  "Value": 6,
+                  "account": 4,
+                  "category": 3,
+                  "date": 5,
+                  "epoch_ms": 0,
+                  "name": 1
+                },
+                "renameByName": {
+                  "account": "Account",
+                  "category": "Category",
+                  "name": "Name"
+                }
+              }
+            }
+          ],
+          "type": "table-old"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 9
+          },
+          "hiddenSeries": false,
+          "id": 6,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum (transaction_amount_cents{category=\"Savings\"}) / 100",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "Total",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Savings",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:2807",
+              "format": "currencyUSD",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:2808",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
         }
       ],
-      "schemaVersion": 22,
+      "schemaVersion": 25,
       "style": "dark",
       "tags": [],
       "templating": {
@@ -192,8 +428,5 @@ data:
       "timezone": "",
       "title": "Finances",
       "uid": "Fd7uU0MGz",
-      "variables": {
-        "list": []
-      },
       "version": 1
     }
