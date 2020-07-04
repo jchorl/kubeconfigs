@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sheetheus
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: sheetheus
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: sheetheus
+    spec:
+      containers:
+      - name: sheetheus
+        image: jchorl/sheetheus:sha-e066c53
+        env:
+        - name: PORT
+          value: "8080"
+        - name: FINANCE_SPREADSHEET_ID
+          value: "1yiHbSLDIIYPZPJrgfSnpJZKelaQ3CFVE9bFPs77MMAI"
+        volumeMounts:
+          - name: creds
+            mountPath: /opt/app/.creds
+            readOnly: true
+        ports:
+        - containerPort: 8080
+      volumes:
+      - name: creds
+        secret:
+          secretName: sheetheus
