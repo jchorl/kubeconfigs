@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sheetheus
-  namespace: monitoring
+  namespace: sheetheus
 spec:
   selector:
     matchLabels:
@@ -19,12 +19,14 @@ spec:
     spec:
       containers:
       - name: sheetheus
-        image: jchorl/sheetheus:sha-e066c53
+        image: jchorl/sheetheus:sha-12dd1bf
         env:
         - name: PORT
           value: "8080"
         - name: FINANCE_SPREADSHEET_ID
           value: "1yiHbSLDIIYPZPJrgfSnpJZKelaQ3CFVE9bFPs77MMAI"
+        - name: RO_FILESYSTEM
+          value: "1"
         volumeMounts:
           - name: creds
             mountPath: /opt/app/.creds

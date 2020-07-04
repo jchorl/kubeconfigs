@@ -42,14 +42,11 @@ data:
     rule_files:
       - /etc/prometheus/prometheus.rules
     scrape_configs:
-      - job_name: 'pihole'
-        static_configs:
-          - targets: ['metrics.pihole:9617']
       - job_name: 'pushgateway'
         honor_labels: true
         static_configs:
           - targets: ['localhost:9091']
-      - job_name: 'nodemetrics'
+      - job_name: 'labelscrape'
         relabel_configs: # only scrape services with prometheus.io/scrape: "true" annotations
           - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
             action: keep
@@ -59,6 +56,10 @@ data:
             namespaces:
               names:
                 - monitoring
+          - role: service
+            namespaces:
+              names:
+                - sheetheus
     alerting:
       alertmanagers:
         - static_configs:
