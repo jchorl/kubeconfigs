@@ -63,7 +63,7 @@ spec:
             - configMap:
                 name: grafana-dashboards-conf
             - configMap:
-                name: pihole-dashboard-conf
+                name: finances-dashboard-conf
             - configMap:
                 name: infra-dashboard-conf
         - name: grafana-plugins
